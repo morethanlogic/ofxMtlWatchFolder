@@ -1,0 +1,7 @@
+# ofxMtlWatchFolder
+
+An addon for openFrameworks 0071 that sends events (on the main thread) when files are added or removed from a watched folder.
+
+## Usage
+
+Look at the example, it's pretty straightforward!
