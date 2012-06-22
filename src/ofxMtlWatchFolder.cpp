@@ -15,6 +15,12 @@ ofxMtlWatchFolder::ofxMtlWatchFolder()
 }
 
 //--------------------------------------------------------------
+ofxMtlWatchFolder::~ofxMtlWatchFolder()
+{
+    ofRemoveListener(ofEvents().update, this, &ofxMtlWatchFolder::update);
+}
+
+//--------------------------------------------------------------
 void ofxMtlWatchFolder::start(const string& path, int interval)
 {
     if (isThreadRunning()) {

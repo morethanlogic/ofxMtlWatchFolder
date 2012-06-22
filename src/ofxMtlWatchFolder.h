@@ -24,6 +24,7 @@ class ofxMtlWatchFolder : public ofThread
 {
 public:
     ofxMtlWatchFolder();
+    ~ofxMtlWatchFolder();
     
     void start(const string& path, int interval);
     void stop();
