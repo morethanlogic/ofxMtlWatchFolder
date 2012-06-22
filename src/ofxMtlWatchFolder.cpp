@@ -21,6 +21,12 @@ ofxMtlWatchFolder::~ofxMtlWatchFolder()
 }
 
 //--------------------------------------------------------------
+void ofxMtlWatchFolder::allowExt(const string& ext)
+{
+    _watchDir.allowExt(ext);
+}
+
+//--------------------------------------------------------------
 void ofxMtlWatchFolder::start(const string& path, int interval)
 {
     if (isThreadRunning()) {
@@ -30,14 +36,13 @@ void ofxMtlWatchFolder::start(const string& path, int interval)
     _watchPath = path;
     _checkInterval = interval;
     
-    ofDirectory watchDir;
-    watchDir.listDir(_watchPath);
-	watchDir.sort();
+    _watchDir.listDir(_watchPath);
+	_watchDir.sort();
     
 	// allocate one entry per file in the map
     _watchFiles.clear();
-    for (int i = 0; i < watchDir.size(); i++) {
-        _watchFiles[watchDir.getName(i)] = false;
+    for (int i = 0; i < _watchDir.size(); i++) {
+        _watchFiles[_watchDir.getName(i)] = false;
     }
     
     startThread(false, false);
@@ -70,12 +75,11 @@ void ofxMtlWatchFolder::checkFolder()
     }
     
     // retrieve an updated file list
-    ofDirectory watchDir;
-    watchDir.listDir(_watchPath);
-	watchDir.sort();
+    _watchDir.listDir(_watchPath);
+	_watchDir.sort();
     
-    for (int i=0; i < watchDir.size(); i++) {
-        string filename = watchDir.getName(i);
+    for (int i=0; i < _watchDir.size(); i++) {
+        string filename = _watchDir.getName(i);
         //ofLogVerbose() << "ofxMtlWatchFolder: Checking file '" << filename << "'" << endl;
         
         if (_watchFiles.find(filename) == _watchFiles.end()) {

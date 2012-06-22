@@ -26,6 +26,8 @@ public:
     ofxMtlWatchFolder();
     ~ofxMtlWatchFolder();
     
+    void allowExt(const string& ext);
+    
     void start(const string& path, int interval);
     void stop();
     
@@ -38,6 +40,7 @@ private:
     void checkFolder();
     void update(ofEventArgs& args);
     
+    ofDirectory _watchDir;
     string _watchPath;
     map<string, bool> _watchFiles;
     int _checkInterval;
