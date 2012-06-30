@@ -14,8 +14,10 @@
 //--------------------------------------------------------------
 struct ofxMtlWatchFile
 {
-    string name;
-    bool flag;
+    bool     done;
+    bool     flag;
+    uint64_t size;
+    unsigned time;
 };
 
 //--------------------------------------------------------------
@@ -25,7 +27,7 @@ class ofxMtlWatchFolder : public ofThread
 public:
     ofxMtlWatchFolder();
     
-    void start(const string& path, int interval);
+    void start(const string& path, unsigned checkInterval, unsigned sizeInterval = 3000);
     void stop();
     
     void threadedFunction();
@@ -38,8 +40,9 @@ private:
     void update(ofEventArgs& args);
     
     string _watchPath;
-    map<string, bool> _watchFiles;
-    int _checkInterval;
+    map<string, ofxMtlWatchFile> _watchFiles;
+    unsigned _checkInterval;
+    unsigned _sizeInterval;
     
     vector<string> filesAdded;
     vector<string> filesRemoved;

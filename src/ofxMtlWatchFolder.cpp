@@ -15,14 +15,15 @@ ofxMtlWatchFolder::ofxMtlWatchFolder()
 }
 
 //--------------------------------------------------------------
-void ofxMtlWatchFolder::start(const string& path, int interval)
+void ofxMtlWatchFolder::start(const string& path, unsigned checkInterval, unsigned sizeInterval)
 {
     if (isThreadRunning()) {
         stopThread();
     }
     
     _watchPath = path;
-    _checkInterval = interval;
+    _checkInterval = checkInterval;
+    _sizeInterval = sizeInterval;
     
     ofDirectory watchDir;
     watchDir.listDir(_watchPath);
@@ -31,7 +32,10 @@ void ofxMtlWatchFolder::start(const string& path, int interval)
 	// allocate one entry per file in the map
     _watchFiles.clear();
     for (int i = 0; i < watchDir.size(); i++) {
-        _watchFiles[watchDir.getName(i)] = false;
+        _watchFiles[watchDir.getName(i)].done = false;
+        _watchFiles[watchDir.getName(i)].flag = false;
+        _watchFiles[watchDir.getName(i)].size = watchDir.getFile(i).getSize();
+        _watchFiles[watchDir.getName(i)].time = ofGetElapsedTimeMillis();
     }
     
     startThread(false, false);
@@ -59,8 +63,8 @@ void ofxMtlWatchFolder::threadedFunction()
 void ofxMtlWatchFolder::checkFolder()
 {
     // flag all the current watch files for deletion
-    for (map<string, bool>::iterator it = _watchFiles.begin() ; it != _watchFiles.end(); it++) {
-        (*it).second = true;
+    for (map<string, ofxMtlWatchFile>::iterator it = _watchFiles.begin() ; it != _watchFiles.end(); ++it) {
+        (*it).second.flag = true;
     }
     
     // retrieve an updated file list
@@ -69,27 +73,41 @@ void ofxMtlWatchFolder::checkFolder()
 	watchDir.sort();
     
     for (int i=0; i < watchDir.size(); i++) {
-        string filename = watchDir.getName(i);
+        string name = watchDir.getName(i);
+        ofFile file = watchDir.getFile(i);
+        unsigned now = ofGetElapsedTimeMillis();
         //ofLogVerbose() << "ofxMtlWatchFolder: Checking file '" << filename << "'" << endl;
-        
-        if (_watchFiles.find(filename) == _watchFiles.end()) {
-            // file added
-            ofLogVerbose() << "ofxMtlWatchFolder: File '" << filename << "' ADDED!" << endl;
-            filesAdded.push_back(filename);
-        }
         
         // if it's found in the current list, this call will unflag it
         // otherwise, a new unflagged entry will be created
-        // win win!
-        _watchFiles[filename] = false;
+        _watchFiles[name].flag = false;
+        
+        if (_watchFiles.find(name) == _watchFiles.end()) {
+            // file added to folder
+            _watchFiles[name].done = false;
+            _watchFiles[name].size = file.getSize();
+            _watchFiles[name].time = now;
+        }
+        else if (!_watchFiles[name].done) {
+            // file previously added, check for change in size
+            if (_watchFiles[name].size != file.getSize()) {
+                _watchFiles[name].size = file.getSize();
+                _watchFiles[name].time = now;
+            }
+            else if ((now - _watchFiles[name].time) >= _sizeInterval) {
+                ofLogVerbose() << "ofxMtlWatchFolder: File '" << name << "' ADDED!" << endl;
+                _watchFiles[name].done = true;
+                filesAdded.push_back(name);
+            }
+        }
     }
     
     // go through the current list and remove any flagged entries
-    for (map<string, bool>::iterator it = _watchFiles.begin(); it != _watchFiles.end(); ) {
-        if ((*it).second) {
-            string filename = (*it).first;
-            ofLogVerbose() << "ofxMtlWatchFolder: File '" << filename << "' REMOVED!" << endl;
-            filesRemoved.push_back(filename);
+    for (map<string, ofxMtlWatchFile>::iterator it = _watchFiles.begin(); it != _watchFiles.end(); ) {
+        if ((*it).second.flag) {
+            string name = (*it).first;
+            ofLogVerbose() << "ofxMtlWatchFolder: File '" << name << "' REMOVED!" << endl;
+            filesRemoved.push_back(name);
             _watchFiles.erase(it++); 
         }
         else {
