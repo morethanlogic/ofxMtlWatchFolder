@@ -15,6 +15,18 @@ ofxMtlWatchFolder::ofxMtlWatchFolder()
 }
 
 //--------------------------------------------------------------
+ofxMtlWatchFolder::~ofxMtlWatchFolder()
+{
+    ofRemoveListener(ofEvents().update, this, &ofxMtlWatchFolder::update);
+}
+
+//--------------------------------------------------------------
+void ofxMtlWatchFolder::allowExt(const string& ext)
+{
+    _watchDir.allowExt(ext);
+}
+
+//--------------------------------------------------------------
 void ofxMtlWatchFolder::start(const string& path, unsigned checkInterval, unsigned sizeInterval)
 {
     if (isThreadRunning()) {
@@ -25,17 +37,16 @@ void ofxMtlWatchFolder::start(const string& path, unsigned checkInterval, unsign
     _checkInterval = checkInterval;
     _sizeInterval = sizeInterval;
     
-    ofDirectory watchDir;
-    watchDir.listDir(_watchPath);
-	watchDir.sort();
+    _watchDir.listDir(_watchPath);
+	_watchDir.sort();
     
 	// allocate one entry per file in the map
     _watchFiles.clear();
-    for (int i = 0; i < watchDir.size(); i++) {
-        _watchFiles[watchDir.getName(i)].done = false;
-        _watchFiles[watchDir.getName(i)].flag = false;
-        _watchFiles[watchDir.getName(i)].size = watchDir.getFile(i).getSize();
-        _watchFiles[watchDir.getName(i)].time = ofGetElapsedTimeMillis();
+    for (int i = 0; i < _watchDir.size(); i++) {
+        _watchFiles[_watchDir.getName(i)].done = false;
+        _watchFiles[_watchDir.getName(i)].flag = false;
+        _watchFiles[_watchDir.getName(i)].size = _watchDir.getFile(i).getSize();
+        _watchFiles[_watchDir.getName(i)].time = ofGetElapsedTimeMillis();
     }
     
     startThread(false, false);
@@ -68,16 +79,16 @@ void ofxMtlWatchFolder::checkFolder()
     }
     
     // retrieve an updated file list
-    ofDirectory watchDir;
-    watchDir.listDir(_watchPath);
-	watchDir.sort();
+    _watchDir.listDir(_watchPath);
+	_watchDir.sort();
     
-    for (int i=0; i < watchDir.size(); i++) {
-        string name = watchDir.getName(i);
-        ofFile file = watchDir.getFile(i);
+    for (int i=0; i < _watchDir.size(); i++) {
+        string name = _watchDir.getName(i);
+        ofFile file = _watchDir.getFile(i);
         unsigned now = ofGetElapsedTimeMillis();
-        //ofLogVerbose() << "ofxMtlWatchFolder: Checking file '" << filename << "'" << endl;
-        
+
+        //ofLogVerbose() << "ofxMtlWatchFolder: Checking file '" << name << "'" << endl;
+
         // if it's found in the current list, this call will unflag it
         // otherwise, a new unflagged entry will be created
         _watchFiles[name].flag = false;

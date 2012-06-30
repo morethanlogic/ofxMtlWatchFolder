@@ -26,6 +26,9 @@ class ofxMtlWatchFolder : public ofThread
 {
 public:
     ofxMtlWatchFolder();
+    ~ofxMtlWatchFolder();
+    
+    void allowExt(const string& ext);
     
     void start(const string& path, unsigned checkInterval, unsigned sizeInterval = 3000);
     void stop();
@@ -39,6 +42,7 @@ private:
     void checkFolder();
     void update(ofEventArgs& args);
     
+    ofDirectory _watchDir;
     string _watchPath;
     map<string, ofxMtlWatchFile> _watchFiles;
     unsigned _checkInterval;
