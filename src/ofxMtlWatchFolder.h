@@ -33,6 +33,8 @@ public:
     void start(const string& path, unsigned checkInterval, unsigned sizeInterval = 3000);
     void stop();
     
+    bool isRunning();
+    
     void threadedFunction();
     
     ofEvent<string> fileAdded;

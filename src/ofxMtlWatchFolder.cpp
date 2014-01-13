@@ -59,6 +59,12 @@ void ofxMtlWatchFolder::stop()
 }
 
 //--------------------------------------------------------------
+bool ofxMtlWatchFolder::isRunning()
+{
+    return isThreadRunning();
+}
+
+//--------------------------------------------------------------
 void ofxMtlWatchFolder::threadedFunction()
 {
     while (isThreadRunning()) {
