@@ -43,6 +43,7 @@ public:
     
 private:
     void checkFolder();
+	uint64_t getSize(ofFile& file);
     void update(ofEventArgs& args);
     
     ofDirectory _watchDir;

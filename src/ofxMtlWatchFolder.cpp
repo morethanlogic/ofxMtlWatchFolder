@@ -108,13 +108,14 @@ void ofxMtlWatchFolder::checkFolder()
         if (_watchFiles.find(name) == _watchFiles.end()) {
             // file added to folder
             _watchFiles[name].done = false;
-            _watchFiles[name].size = file.getSize();
+            _watchFiles[name].size = getSize(file);
             _watchFiles[name].time = now;
         }
         else if (!_watchFiles[name].done) {
             // file previously added, check for change in size
-            if (_watchFiles[name].size != file.getSize()) {
-                _watchFiles[name].size = file.getSize();
+			uint64_t fileSize = getSize(file);
+            if (_watchFiles[name].size != fileSize) {
+                _watchFiles[name].size = fileSize;
                 _watchFiles[name].time = now;
             }
             else if ((now - _watchFiles[name].time) >= _sizeInterval) {
@@ -137,6 +138,24 @@ void ofxMtlWatchFolder::checkFolder()
             ++it;
         }
     }
+}
+
+//--------------------------------------------------------------
+uint64_t ofxMtlWatchFolder::getSize(ofFile& file)
+{
+	// dirs have size == 0 so we'll recurse through to get the contents size
+	if (file.isDirectory()) {
+		uint64_t totalSize = 0;
+		ofDirectory dir(file.path());
+		dir.listDir();
+		for (int i = 0; i < dir.numFiles(); i++) {
+			totalSize += getSize(dir.getFile(i));
+		}
+		return totalSize;
+	}
+	else {
+		return file.getSize();
+	}
 }
 
 //--------------------------------------------------------------
