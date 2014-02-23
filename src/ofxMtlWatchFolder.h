@@ -34,6 +34,7 @@ public:
     void stop();
     
     bool isRunning();
+	const string& getWatchPath();
     
     void threadedFunction();
     

@@ -65,6 +65,12 @@ bool ofxMtlWatchFolder::isRunning()
 }
 
 //--------------------------------------------------------------
+const string& ofxMtlWatchFolder::getWatchPath()
+{
+    return _watchPath;
+}
+
+//--------------------------------------------------------------
 void ofxMtlWatchFolder::threadedFunction()
 {
     while (isThreadRunning()) {
