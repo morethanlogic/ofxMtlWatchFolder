@@ -43,9 +43,16 @@ void ofxMtlWatchFolder::start(const string& path, unsigned checkInterval, unsign
 	// allocate one entry per file in the map
     _watchFiles.clear();
     for (int i = 0; i < _watchDir.size(); i++) {
+		
+		_watchFiles[_watchDir.getName(i) ] = ofxMtlWatchFile();
+		
         _watchFiles[_watchDir.getName(i)].done = false;
         _watchFiles[_watchDir.getName(i)].flag = false;
+#ifdef TARGET_OSX
+        _watchFiles[_watchDir.getName(i)].size = ofFile(_watchDir.getPath(i)).getSize();
+#else
         _watchFiles[_watchDir.getName(i)].size = _watchDir.getFile(i).getSize();
+#endif
         _watchFiles[_watchDir.getName(i)].time = ofGetElapsedTimeMillis();
     }
     
@@ -149,7 +156,8 @@ uint64_t ofxMtlWatchFolder::getSize(ofFile& file)
 		ofDirectory dir(file.path());
 		dir.listDir();
 		for (int i = 0; i < dir.numFiles(); i++) {
-			totalSize += getSize(dir.getFile(i));
+			ofFile f = dir.getFile(i);
+			totalSize += getSize(f);
 		}
 		return totalSize;
 	}
