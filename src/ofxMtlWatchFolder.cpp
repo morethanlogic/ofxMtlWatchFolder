@@ -56,7 +56,7 @@ void ofxMtlWatchFolder::start(const string& path, unsigned checkInterval, unsign
         _watchFiles[_watchDir.getName(i)].time = ofGetElapsedTimeMillis();
     }
     
-    startThread(false, false);
+    startThread(false);
 }
 
 //--------------------------------------------------------------
@@ -155,7 +155,7 @@ uint64_t ofxMtlWatchFolder::getSize(ofFile& file)
 		uint64_t totalSize = 0;
 		ofDirectory dir(file.path());
 		dir.listDir();
-		for (int i = 0; i < dir.numFiles(); i++) {
+		for (int i = 0; i < dir.size(); i++) {
 			ofFile f = dir.getFile(i);
 			totalSize += getSize(f);
 		}
